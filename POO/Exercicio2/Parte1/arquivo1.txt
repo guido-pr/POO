@@ -1,0 +1,4 @@
+MinGW
+Este software inclui um conjunto de arquivos cabeçalho para a API do Windows que permite a pessoa dev usar o GCC. 
+O GCC (GNU Compiler Collection) é um conjunto de compiladores de linguagens de programação. 
+Nesses compiladores estão incluídos o de C e C++.

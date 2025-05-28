@@ -1,0 +1,4 @@
+A álgebra linear utiliza alguns conceitos e estruturas fundamentais da matemática como vetores, 
+espaços vetoriais, transformações lineares, sistemas de equações lineares e matrizes. 
+Linhas e planos passando através da origem são subespaços lineares no espaço euclidiano R³. 
+Subespaços são estudados em álgebra linear.

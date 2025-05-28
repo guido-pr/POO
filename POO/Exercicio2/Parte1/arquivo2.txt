@@ -1,0 +1,3 @@
+Chama-se equação diferencial a uma equação em que a incógnita é uma função (variável dependente)
+de uma ou mais variáveis (independentes), envolvendo derivadas da variável dependente em relação a 
+uma ou mais variáveis independentes.
