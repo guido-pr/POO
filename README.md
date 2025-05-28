@@ -1,2 +1,2 @@
 # POO
-Repository used to the OOP (Object Oriented Programming) discipline in UFMG
+Repositório usado para a disciplina Programação orientada a objetos (POO) na UFMG
