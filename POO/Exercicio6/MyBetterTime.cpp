@@ -3,82 +3,80 @@
 #include <iomanip>
 #include <stdexcept>
 
-MyBetterTime::MyBetterTime(int h, int m, int s) : MyTime(h, m), seconds(s) {
-    if (seconds >= 60) {
-        minutes += seconds / 60;
-        seconds %= 60;
-    }
-    if (minutes >= 60) {
-        hours += minutes / 60;
-        minutes %= 60;
-    }
-    if (hours >= 24) {
-        hours %= 24;
-    }
+MyBetterTime::MyBetterTime(int h, int m, int s)
+    : MyTime(h, m), segundos(s) {
+    normalize();
 }
 
 MyBetterTime::MyBetterTime(const std::string& timeStr) {
+    char sep1, sep2;
     std::istringstream iss(timeStr);
-    char colon1, colon2;
-    if (!(iss >> hours >> colon1 >> minutes >> colon2 >> seconds) || colon1 != ':' || colon2 != ':') {
-        throw std::invalid_argument("Invalid time format. Expected hh:mm:ss");
+    iss >> hours >> sep1 >> minutes >> sep2 >> segundos;
+
+    if (sep1 != ':' || sep2 != ':' || iss.fail()) {
+        throw std::invalid_argument("Formato de tempo inválido. Esperado HH:MM:SS");
+    }
+    normalize();
+}
+
+MyBetterTime::MyBetterTime(const MyTime& time)
+    : MyTime(time), segundos(0) {
+}
+
+void MyBetterTime::normalize() {
+    if (segundos >= 60 || segundos < 0 || minutes >= 60 || minutes < 0 || hours < 0) {
+        int total = hours * 3600 + minutes * 60 + segundos;
+        if (total < 0) total = 0;
+
+        hours = (total / 3600) % 24;
+        minutes = (total % 3600) / 60;
+        segundos = total % 60;
+    }
+}
+
+int MyBetterTime::getSegundos() const {
+    return segundos;
+}
+
+void MyBetterTime::SetTime(const std::string& timeStr) {
+    std::istringstream iss(timeStr);
+    char sep1, sep2;
+    int h, m, s;
+
+    if (!(iss >> h >> sep1 >> m >> sep2 >> s) || sep1 != ':' || sep2 != ':') {
+        throw std::invalid_argument("Formato inválido. Use HH:MM:SS.");
     }
 
-    if (seconds >= 60) {
-        minutes += seconds / 60;
-        seconds %= 60;
-    }
-    if (minutes >= 60) {
-        hours += minutes / 60;
-        minutes %= 60;
-    }
-    if (hours >= 24) {
-        hours %= 24;
-    }
+    hours = h;
+    minutes = m;
+    segundos = s;
 }
 
 std::string MyBetterTime::Time() const {
     std::ostringstream oss;
     oss << std::setw(2) << std::setfill('0') << hours << ":"
         << std::setw(2) << std::setfill('0') << minutes << ":"
-        << std::setw(2) << std::setfill('0') << seconds;
+        << std::setw(2) << std::setfill('0') << segundos;
     return oss.str();
 }
-
-MyTime MyBetterTime::operator+(const MyTime& other) const {
-    std::string otherTime = other.Time(); 
-
-    int otherHours, otherMinutes, otherSeconds = 0; 
-    char colon1, colon2;
-
-    std::istringstream iss(otherTime);
-    if (!(iss >> otherHours >> colon1 >> otherMinutes)) {
-        throw std::invalid_argument("Invalid time format in other object.");
-    }
-
-    if (colon1 == ':' && iss >> colon2 && colon2 == ':' && iss >> otherSeconds) {}
-
-    int totalSeconds = (hours + otherHours) * 3600 +
-                        (minutes + otherMinutes) * 60 +
-                        (seconds + otherSeconds);
-
-    int newHours = (totalSeconds / 3600) % 24;
-    int newMinutes = (totalSeconds / 60) % 60;
-    int newSeconds = totalSeconds % 60;
-
-    return MyBetterTime(newHours, newMinutes, newSeconds);
+   
+MyBetterTime MyBetterTime::operator+(const MyBetterTime& other) const {
+    int total = (hours + other.hours) * 3600 +
+                (minutes + other.minutes) * 60 +
+                (segundos + other.segundos);
+    return MyBetterTime(0, 0, total);
 }
 
-MyBetterTime MyBetterTime::operator+(const MyBetterTime& other) const {
-    int totalSeconds = hours * 3600 + minutes * 60 + seconds +
-                       other.hours * 3600 + other.minutes * 60 + other.seconds;
-    int newHours = (totalSeconds / 3600) % 24;
-    int newMinutes = (totalSeconds / 60) % 60;
-    int newSeconds = totalSeconds % 60;
-    return MyBetterTime(newHours, newMinutes, newSeconds);
+MyBetterTime MyBetterTime::operator+(int segundos) const {
+    int total = hours * 3600 + minutes * 60 + this->segundos + segundos;
+    return MyBetterTime(0, 0, total);
+}
+
+void MyBetterTime::print(std::ostream& os) const {
+    os << Time();
 }
 
 std::ostream& operator<<(std::ostream& os, const MyBetterTime& time) {
-    os << time.Time();
+    time.print(os); // permite polimorfismo
     return os;
 }

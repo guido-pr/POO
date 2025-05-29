@@ -1,147 +1,199 @@
 #include "MyDate.hpp"
 #include <iostream>
-#include <ostream>
 #include <sstream>
+#include <iomanip>
 #include <stdexcept>
+#include <array>
 
-// Função auxiliar para verificar se o ano é bissexto
-bool MyDate::isLeapYear(int year) const {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+bool MyDate::formatoLongo = true;
+
+// Construtores
+MyDate::MyDate(int dia) : MyDate(dia, 1, 2000) {}
+MyDate::MyDate(int dia, int mes) : MyDate(dia, mes, 2000) {}
+MyDate::MyDate(int dia, int mes, int ano) {
+    if (!isValidDate(ano, mes, dia)) {
+        throw std::runtime_error(getErrorMessage(ano, mes, dia));
+    }
+    day = dia;
+    month = mes;
+    year = ano;
 }
 
-// Função auxiliar para validar a data
-bool MyDate::isValidDate(int year, int month, int day) const {
-    if (month < 1 || month > 12 || day < 1) {
-        return false;
+MyDate::MyDate(const std::string& dateStr) {
+    SetDate(dateStr);
+}
+
+int MyDate::getDay() const {
+    return day;
+}
+ 
+ int MyDate::getMonth() const {
+ return month;
+}
+ 
+ int MyDate::getYear() const {
+    return year;
+}
+
+void MyDate::SetDate(const std::string& dateStr) {
+    std::istringstream iss(dateStr);
+    char sep1, sep2;
+    int y, m, d;
+
+    if (!(iss >> y >> sep1 >> m >> sep2 >> d) || sep1 != '-' || sep2 != '-') {
+        throw std::invalid_argument("Formato inválido. Use YYYY-MM-DD.");
     }
 
-    // Dias máximos em cada mês
-    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-    // Ajustar fevereiro para anos bissextos
-    if (month == 2 && isLeapYear(year)) {
-        daysInMonth[1] = 29;
-    }
-
-    return day <= daysInMonth[month - 1];
-}
-
-// Construtor que recebe uma string no formato "YYYY-MM-DD"
-MyDate::MyDate(const std::string& date) {
-    SetDate(date); // Delegar para o método SetDate
-}
-
-MyDate::MyDate(int day, int month, int year) {
-    if (!isValidDate(year, month, day)) {
+    if (!isValidDate(y, m, d)) {
         throw std::invalid_argument("Data inválida.");
     }
-    this->day = day;
-    this->month = month;
-    this->year = year;
-    this->formatoLongo = false; // valor padrão
-}
 
-// Método para alterar a data
-void MyDate::SetDate(const std::string& date) {
-    // Verificar o formato da string
-    if (date.size() != 10 || date[4] != '-' || date[7] != '-') {
-        throw std::invalid_argument("Formato invalido! Use 'YYYY-MM-DD'.");
-    }
-
-    // Extrair ano, mês e dia da string
-    int y, m, d;
-    char separator1, separator2;
-    std::istringstream iss(date);
-    if (!(iss >> y >> separator1 >> m >> separator2 >> d) || separator1 != '-' || separator2 != '-') {
-        throw std::invalid_argument("Formato invalido! Use 'YYYY-MM-DD'.");
-    }
-
-    // Validar a data
-    if (!isValidDate(y, m, d)) {
-        throw std::invalid_argument("Data invalida!");
-    }
-
-    // Atribuir os valores
     year = y;
     month = m;
     day = d;
 }
 
-// Método para retornar a data por extenso
+bool MyDate::isLeapYear(int y) const {
+    return (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
+}
+
+bool MyDate::isValidDate(int y, int m, int d) const {
+    if (y < 0 || m < 1 || m > 12 || d < 1) return false;
+
+    std::array<int, 12> daysInMonth = {31,28,31,30,31,30,31,31,30,31,30,31};
+    if (m == 2 && isLeapYear(y)) return d <= 29;
+
+    return d <= daysInMonth[m - 1];
+}
+
 std::string MyDate::Date() const {
-    const std::string months[] = {
-        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-    };
-
-    std::ostringstream oss;
-    
     if (formatoLongo) {
-        oss << day << " de " << months[month - 1] << " de " << year;
+        static const std::string meses[12] = {
+            "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+            "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+        };
+        std::ostringstream oss;
+        oss << day << " de " << meses[month - 1] << " de " << year;
+        return oss.str();
     } else {
-        oss << year << "-"
-            << (month < 10 ? "0" : "") << month << "-"
-            << (day < 10 ? "0" : "") << day;
+        std::ostringstream oss;
+        oss << std::setw(2) << std::setfill('0') << day << "/"
+            << std::setw(2) << std::setfill('0') << month << "/"
+            << std::setw(2) << std::setfill('0') << (year % 100);
+        return oss.str();
     }
-    // Faltava este fechamento
-    return oss.str();
-}
-
-// Métodos para obter os valores individuais
-int MyDate::GetDay() const {
-    return day;
-}
-
-int MyDate::GetMonth() const {
-    return month;
-}
-
-int MyDate::GetYear() const {
-    return year;
-}
-
-bool MyDate::GetFormatoLongo() const {
-    return formatoLongo;
 }
 
 void MyDate::SetFormatoLongo(bool longo) {
     formatoLongo = longo;
 }
 
-MyDate MyDate::operator+(int dias) const {
-    int d = GetDay() + dias;
-    int m = GetMonth();
-    int y = GetYear();
+MyDate MyDate::operator+(const MyDate& other) const {
+    int newDay = day + other.day;
+    int newMonth = month + other.month;
+    int newYear = year + other.year;
 
-    std::ostringstream oss;
-    oss << y << "-"
-        << (m < 10 ? "0" : "") << m << "-"
-        << (d < 10 ? "0" : "") << d;
-
-    if (!isValidDate(y, m, d)) {
-        throw std::invalid_argument("Data invalida!");
+    // Ajusta mês e ano se necessário
+    while (newMonth > 12) {
+        newMonth -= 12;
+        newYear++;
     }
-    return MyDate(oss.str());
+
+    // Cria data e ajusta dias extras
+    MyDate result(1, newMonth, newYear);
+    result.addDays(newDay - 1); // começa no dia 1 e avança newDay - 1
+    return result;
 }
 
-MyDate MyDate::operator+(const MyDate& other) const {
-    int new_day = GetDay() + other.GetDay();
-    int new_month = GetMonth() + other.GetMonth();
-    int new_year = GetYear() + other.GetYear();
+MyDate MyDate::operator+(int dias) const {
+    MyDate result = *this;
+    result.addDays(dias);
+    return result;
+}
 
-    std::ostringstream oss;
-    oss << new_year << "-"
-        << (new_month < 10 ? "0" : "") << new_month << "-"
-        << (new_day < 10 ? "0" : "") << new_day;
-        
-    if (!isValidDate(new_year, new_month, new_day)) {
-        throw std::invalid_argument("Data invalida!");
+MyDate operator+(int dias, const MyDate& data) {
+    return data + dias;
+}
+
+void MyDate::addDays(int dias) {
+    static const std::array<int, 12> diasPorMes = {31,28,31,30,31,30,31,31,30,31,30,31};
+    day += dias;
+
+    while (true) {
+        int maxDias = diasPorMes[month - 1];
+        if (month == 2 && isLeapYear(year)) maxDias = 29;
+
+        if (day <= maxDias) break;
+
+        day -= maxDias;
+        month++;
+        if (month > 12) {
+            month = 1;
+            year++;
+        }
     }
+}
 
-    return MyDate(oss.str());
+std::string MyDate::getErrorMessage(int year, int month, int day) const {
+    if (year < 0) {
+        return "Ano invalido: " + std::to_string(year) + ". O ano nao pode ser negativo.";
+    }
+    if (month < 1 || month > 12) {
+        return "Mes invalido: " + std::to_string(month) + ". O mes deve estar entre 1 e 12.";
+    }
+    
+    if (day < 1) {
+        return "Dia invalido: " + std::to_string(day) + ". O dia nao pode ser menor que 1.";
+    }
+    
+    std::array<int, 12> daysInMonth = {31,28,31,30,31,30,31,31,30,31,30,31};
+    int maxDay = daysInMonth[month - 1];
+    if (month == 2 && isLeapYear(year)) maxDay = 29;
+    
+    if (day > maxDay) {
+        return "Dia invalido: " + std::to_string(day) + 
+               ". O mes " + std::to_string(month) + 
+               " tem no maximo " + std::to_string(maxDay) + " dias" + 
+               (isLeapYear(year) && month == 2 ? " (ano bissexto)" : "") + ".";
+    }
+    
+    return "Data invalida por razao desconhecida.";
+}
+
+MyDate MyDate::DataCorretaAproximada(int dia, int mes, int ano) {
+    int originalDia = dia;
+    int originalMes = mes;
+    int originalAno = ano;
+    
+    while (true) {
+        try {
+            return MyDate(dia, mes, ano);
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Erro: " << e.what() << " Ajustando valores..." << std::endl;
+            
+            // Ajusta os valores conforme necessário
+            if (dia > 28) dia--;
+            else if (dia < 1) dia++;
+            
+            if (mes > 12) mes--;
+            else if (mes < 1) mes++;
+            
+            if (ano > 2100) ano--;
+            else if (ano < 0) ano++;
+            
+            // Se voltou aos valores originais (caso raro de loop infinito)
+            if (dia == originalDia && mes == originalMes && ano == originalAno) {
+                dia = 1; mes = 1; ano = 2000; // Valor padrão seguro
+            }
+        }
+    }
+}
+
+void MyDate::print(std::ostream& os) const {
+    os << Date();
 }
 
 std::ostream& operator<<(std::ostream& os, const MyDate& date) {
-    os << date.Date();
+    date.print(os); // permite polimorfismo
     return os;
 }
