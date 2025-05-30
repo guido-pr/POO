@@ -67,6 +67,11 @@ MyBetterTime MyBetterTime::operator+(const MyBetterTime& other) const {
     return MyBetterTime(0, 0, total);
 }
 
+MyTime MyBetterTime::operator+(const MyTime* other) const {
+    int totalMinutes = (hours + other->getHoras()) * 60 + minutes + other->getMinutos();
+    return MyTime(0, totalMinutes); 
+}
+
 MyBetterTime MyBetterTime::operator+(int segundos) const {
     int total = hours * 3600 + minutes * 60 + this->segundos + segundos;
     return MyBetterTime(0, 0, total);
@@ -80,3 +85,6 @@ std::ostream& operator<<(std::ostream& os, const MyBetterTime& time) {
     time.print(os); // permite polimorfismo
     return os;
 }
+
+MyBetterTime::~MyBetterTime() {}
+

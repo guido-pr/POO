@@ -197,3 +197,5 @@ std::ostream& operator<<(std::ostream& os, const MyDate& date) {
     date.print(os); // permite polimorfismo
     return os;
 }
+
+MyDate::~MyDate() {}

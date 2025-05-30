@@ -16,14 +16,18 @@ public:
     MyBetterTime(const std::string& timeStr);
 
     int getSegundos() const;
-    void SetTime(const std::string& timeStr);
 
-    virtual std::string Time() const override; // sobrescreve Time()
+    void SetTime(const std::string& timeStr);
+    virtual std::string Time() const override;
+    
     virtual MyBetterTime operator+(const MyBetterTime& other) const;
-    MyBetterTime operator+(int segundos) const; // soma com inteiro
+    virtual MyTime operator+(const MyTime* other) const; 
+    MyBetterTime operator+(int segundos) const;
 
     virtual void print(std::ostream& os) const override;
     friend std::ostream& operator<<(std::ostream& os, const MyBetterTime& time);
+
+    virtual ~MyBetterTime();
 };
 
 #endif

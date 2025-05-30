@@ -13,12 +13,18 @@ protected:
 
 public:
     MyTime(int h = 0, int m = 0);
-    virtual std::string Time() const; 
-    virtual MyTime operator+(const MyTime& other) const; 
-    virtual void print(std::ostream& os) const;
-    friend std::ostream& operator<<(std::ostream& os, const MyTime& time);
+
     int getHoras() const;
     int getMinutos() const;
+
+    virtual std::string Time() const; 
+
+    virtual MyTime operator+(const MyTime& other) const; 
+    
+    virtual void print(std::ostream& os) const;
+    friend std::ostream& operator<<(std::ostream& os, const MyTime& time);
+
+    virtual ~MyTime();
 };
 
 #endif

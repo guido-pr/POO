@@ -45,3 +45,5 @@ std::ostream& operator<<(std::ostream& os, const MyTime& time) {
     time.print(os); // permite polimorfismo
     return os;
 }
+
+MyTime::~MyTime() {}

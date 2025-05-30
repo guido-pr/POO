@@ -1,11 +1,11 @@
 #include "MyDateTime.hpp"
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
 
 MyDateTime::MyDateTime(int day, int month, int year, int hour, int minute, int second)
     : MyDate(day, month, year), MyBetterTime(hour, minute, second) {
-    // Validação implícita ocorre nos construtores das classes base
 }
 
 MyDateTime::MyDateTime(const std::string& datetimeStr) 
@@ -53,3 +53,5 @@ std::ostream& operator<<(std::ostream& os, const MyDateTime& dt) {
     os << dt.DateTime();
     return os;
 }
+
+MyDateTime::~MyDateTime() {}
