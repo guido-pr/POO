@@ -1,22 +1,32 @@
 #include <iostream>
-#include "OrderedDateTime.hpp"
+#include "MyCalendar.hpp"
 
 int main() {
+    MyCalendar agenda;
+
     OrderedDateTime dt1(7, 7, 2024, 15, 30, 0);
-    OrderedDateTime dt2(1, 1, 2025, 0, 0, 0);
-    OrderedDateTime dt3(7, 7, 2024, 15, 30, 0);
+    OrderedDateTime dt2(8, 7, 2024, 10, 0, 0);
+    OrderedDateTime dt3(7, 7, 2024, 18, 0, 0);
 
-    if (dt1 < dt2) {
-        std::cout << "dt1 é anterior a dt2\n";
-    } else {
-        std::cout << "dt1 NÃO é anterior a dt2\n";
-    }
+    agenda.addEvent(dt1, "Reunião de equipe");
+    agenda.addEvent(dt2, "Consulta médica");
+    agenda.addEvent(dt3, "Jantar com amigos");
 
-    if (dt1 < dt3) {
-        std::cout << "dt1 é anterior a dt3\n";
-    } else {
-        std::cout << "dt1 NÃO é anterior a dt3\n";
-    }
+    std::cout << "Eventos cadastrados:\n";
+    agenda.listEvents();
+
+    std::cout << "\nRemovendo evento das 18h...\n";
+    agenda.removeEvent(dt3);
+
+    std::cout << "\nEventos após remoção:\n";
+    agenda.listEvents();
+
+    std::cout << "\nBuscando evento das 15:30:\n";
+    std::string evento = agenda.getEvent(dt1);
+    if (!evento.empty())
+        std::cout << evento << '\n';
+    else
+        std::cout << "Nenhum evento encontrado.\n";
 
     return 0;
 }
